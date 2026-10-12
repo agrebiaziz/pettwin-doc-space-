@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PetTwin · Clinic Dashboard</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'><ellipse cx='14' cy='18.2' rx='6.2' ry='5' fill='%23FF6B7C'/><circle cx='22.6' cy='5.4' r='3' fill='%23FFB627'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+--bg:#F2F6FA;--panel:#fff;--p2:#EEF4F9;--line:#DFE9F1;--line2:#C9D8E4;
+--ink:#13202E;--mut:#5A6B7A;--faint:#93A5B3;
+--coral:#F04E63;--sky:#2E86C0;--mint:#1F9E77;--amber:#C77F00;--red:#D0333A;}
+html[data-theme="dark"]{
+--bg:#0B1218;--panel:#101B24;--p2:#15242F;--line:#1F3242;--line2:#2A4356;
+--ink:#E8F1F6;--mut:#8FA8B6;--faint:#5F7A88;
+--coral:#FF6B7C;--sky:#4DA8DA;--mint:#2FC79A;--amber:#FFB627;--red:#E5484D;}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Inter Tight',system-ui,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+button{cursor:pointer;font-family:inherit}
+a{text-decoration:none;color:inherit}
+.app{display:flex;height:100vh}
+/* SIDEBAR */
+.side{width:74px;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:3px;flex-shrink:0;z-index:5}
+.logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,rgba(255,107,124,.14),rgba(255,182,39,.1));display:grid;place-items:center;margin-bottom:10px}
+.nb{width:54px;height:52px;border:0;background:none;border-radius:13px;color:var(--faint);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font:inherit;font-size:8px;font-weight:700;position:relative;transition:.15s}
+.nb svg{width:19px;height:19px}
+.nb:hover{background:var(--p2);color:var(--mut)}
+.nb.on{color:var(--coral);background:rgba(240,78,99,.09)}
+.nb.on::before{content:"";position:absolute;left:-11px;top:11px;bottom:11px;width:3px;border-radius:3px;background:var(--coral)}
+.bdg{position:absolute;top:4px;right:6px;min-width:15px;height:15px;border-radius:99px;background:var(--red);color:#fff;font-size:9px;font-weight:800;display:grid;place-items:center;padding:0 3px}
+.sp{flex:1}
+/* MAIN */
+.main{flex:1;overflow-y:auto;min-width:0}
+.top{position:sticky;top:0;z-index:9;background:var(--bg);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 24px;flex-wrap:wrap}
+.top h1{font-size:16.5px}
+.top .s{font-size:11.5px;color:var(--mut);margin-top:1px}
+.tr{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.clock{font-size:13px;font-weight:700;color:var(--mut);font-variant-numeric:tabular-nums}
+.ldot{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;color:var(--mint);background:rgba(31,158,119,.08);border:1px solid rgba(31,158,119,.25);padding:5px 11px;border-radius:99px}
+.ldot i{width:7px;height:7px;border-radius:50%;background:var(--mint);animation:bl 1.6s infinite}
+@keyframes bl{50%{opacity:.25}}
+.pg{display:none;padding:20px 24px 90px;max-width:1200px;margin:0 auto}
+.pg.on{display:block}
+/* COMPONENTS */
+.c{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:16px;margin-bottom:13px}
+.ch{font-size:14.5px;margin-bottom:2px}
+.cs{font-size:11.5px;color:var(--mut)}
+.kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px}
+.k{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:12px 14px}
+.k b{font-size:24px;display:block;line-height:1.1}
+.k span{font-size:9.5px;text-transform:uppercase;letter-spacing:1px;color:var(--faint);font-weight:700}
+.k.r b{color:var(--red)}.k.a b{color:var(--amber)}.k.m b{color:var(--mint)}.k.s b{color:var(--sky)}.k.c b{color:var(--coral)}
+/* PATIENT ROWS */
+.pr{display:grid;grid-template-columns:minmax(190px,1.2fr) 88px 76px 84px 120px 1fr 16px;gap:11px;align-items:center;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--mint);border-radius:13px;padding:11px 14px;margin-bottom:9px;cursor:pointer;transition:.15s}
+.pr:hover{border-color:var(--line2);transform:translateY(-1px)}
+.pr.w{border-left-color:var(--amber)}
+.pr.x{border-left-color:var(--red)}
+.pr.sel{outline:2px solid var(--sky);outline-offset:1px}
+.pv{width:40px;height:40px;border-radius:11px;overflow:hidden;flex-shrink:0}
+.pv svg{width:100%;height:100%;display:block}
+.pn{display:flex;gap:11px;align-items:center;min-width:0}
+.pn b{font-size:13.5px;display:block}
+.pn span{font-size:10.5px;color:var(--mut)}
+.pc b{font-size:13px;font-weight:700;display:block}
+.pc span{font-size:8.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--faint);font-weight:700}
+.bdg2{font-size:9.5px;font-weight:800;padding:3px 9px;border-radius:99px;white-space:nowrap}
+.bg-m{background:rgba(31,158,119,.12);color:var(--mint)}
+.bg-a{background:rgba(199,127,0,.12);color:var(--amber)}
+.bg-x{background:rgba(208,51,58,.12);color:var(--red)}
+.sc{font-size:19px;font-weight:800}
+.arrow{color:var(--faint);font-weight:800;text-align:right}
+.sk{width:100%;height:26px;display:block}
+/* DETAIL */
+.vg{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:9px;margin-top:12px}
+.vb{background:var(--p2);border:1px solid var(--line);border-radius:11px;padding:10px}
+.vb b{font-size:17px;font-weight:700;display:block}
+.vb b em{font-style:normal;font-size:8px;font-weight:800;color:var(--mint);margin-left:4px}
+.vb span{font-size:8.5px;text-transform:uppercase;letter-spacing:.9px;color:var(--faint);font-weight:700}
+.vb.w b{color:var(--amber)}.vb.x b{color:var(--red)}
+.cht{width:100%;height:auto;display:block;margin-top:12px}
+.ai{background:var(--p2);border:1px solid var(--line2);border-radius:12px;padding:13px;margin-top:12px}
+.ai .h{font-size:9.5px;letter-spacing:1.3px;font-weight:800;color:var(--sky);margin-bottom:6px}
+.ai p{font-size:12.5px;line-height:1.6;margin:0}
+.ai .e{margin-top:7px;font-size:11.5px;color:var(--mut);display:flex;gap:6px}
+.ai .e::before{content:"▸";color:var(--sky)}
+.ai .r{margin-top:9px;color:var(--mint);font-weight:600;font-size:12.5px}
+.acts{display:flex;gap:8px;margin-top:13px;flex-wrap:wrap}
+.btn{border:0;border-radius:10px;padding:10px 15px;font:inherit;font-weight:700;font-size:12px;transition:.15s}
+.btn:active{transform:scale(.97)}
+.btn.p{background:var(--coral);color:#fff}
+.btn.s{background:var(--p2);border:1px solid var(--line2);color:var(--ink)}
+.btn.g{background:var(--mint);color:#fff}
+.btn.r{background:var(--red);color:#fff}
+/* TIMELINE */
+.tl{display:flex;gap:11px;padding:8px 0;border-top:1px solid var(--line)}
+.tl:first-of-type{border-top:0}
+.tl .tt{font-size:11px;color:var(--faint);font-weight:700;width:46px;flex-shrink:0;padding-top:2px}
+.tl .tb{font-size:12.5px;line-height:1.45}
+.tl.w .tb{color:var(--amber)}.tl.x .tb{color:var(--red)}.tl.g .tb{color:var(--mint)}
+/* EMERGENCY */
+.em{border:1px solid rgba(208,51,58,.4);background:rgba(208,51,58,.06);border-radius:15px;padding:15px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:13px}
+.em.pp{animation:pu 2.4s infinite}
+@keyframes pu{50%{box-shadow:0 0 0 6px rgba(208,51,58,.09)}}
+.em .pu{width:42px;height:42px;border-radius:50%;background:var(--red);display:grid;place-items:center;font-size:19px;flex-shrink:0}
+.em b{font-size:14px;display:block}
+.em p{font-size:11.5px;color:var(--mut);margin-top:2px}
+/* LISTS */
+.ls{display:flex;flex-direction:column;gap:8px}
+.lr{display:flex;align-items:center;gap:11px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 13px}
+.lr .ic{width:34px;height:34px;border-radius:10px;background:var(--p2);display:grid;place-items:center;font-size:15px;flex-shrink:0}
+.lr .in{flex:1;min-width:0}
+.lr .in b{font-size:12.5px;display:block}
+.lr .in p{font-size:11px;color:var(--mut);margin-top:1px}
+.lr .wh{font-size:10px;color:var(--faint);font-weight:700;flex-shrink:0}
+.tg{font-size:9.5px;font-weight:800;padding:3px 9px;border-radius:99px;white-space:nowrap;flex-shrink:0}
+.tg.b{background:rgba(46,134,192,.12);color:var(--sky)}
+.tg.m{background:rgba(31,158,119,.12);color:var(--mint)}
+.tg.a{background:rgba(199,127,0,.13);color:var(--amber)}
+/* MESSAGES */
+.newmsg{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:13px;margin-top:13px}
+.newmsg textarea{width:100%;background:var(--p2);border:1px solid var(--line2);border-radius:10px;color:var(--ink);font:inherit;font-size:12.5px;padding:10px;min-height:66px;resize:vertical;outline:0}
+.newmsg select{padding:8px 12px;border-radius:10px;border:1px solid var(--line2);background:var(--p2);color:var(--ink);font:inherit;font-size:12px;font-weight:600}
+.twoc{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;align-items:start}
+@media(max-width:920px){.twoc{grid-template-columns:1fr}.app{flex-direction:column}.side{width:100%;flex-direction:row;padding:8px;overflow-x:auto}.logo{margin:0 8px 0 0}.nb{width:auto;height:38px;flex-direction:row;gap:6px;font-size:10px;padding:0 11px}.nb.on::before{display:none}.pr{grid-template-columns:1fr 1fr}.pr .sk,.pr .hide{display:none}}
+/* SECTION LABEL */
+.sl{font-size:10px;letter-spacing:1.2px;text-transform:uppercase;font-weight:800;color:var(--faint);margin:16px 0 10px;display:flex;align-items:center;gap:8px}
+.sl::after{content:"";flex:1;height:1px;background:var(--line)}
+/* DEMO BAR */
+.dbar{position:fixed;bottom:13px;right:13px;display:flex;gap:7px;z-index:40}
+.dbar button{border:1px solid var(--line2);background:var(--panel);color:var(--mut);font:inherit;font-size:11px;font-weight:700;padding:8px 13px;border-radius:99px}
+.dbar button:hover{color:var(--ink)}
+.dbar .r{border-color:rgba(208,51,58,.45);color:var(--red)}
+#toast{position:fixed;bottom:58px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);font-size:12.5px;font-weight:600;padding:10px 17px;border-radius:11px;box-shadow:0 14px 34px rgba(0,0,0,.25);display:none;z-index:99}
+/* STATUS BAR */
+.stat{position:fixed;bottom:0;left:0;right:0;z-index:98;background:var(--panel);border-top:1px solid var(--line);font-size:10.5px;color:var(--faint);font-weight:600;padding:4px 14px;display:flex;gap:14px;justify-content:center}
+.stat b{color:var(--mint)}
+/* PRINT */
+@media print{.side,.top,.dbar,#toast,.stat,.acts{display:none!important}body,.app{height:auto;overflow:visible}.pg{display:block!important;padding:0}}
+</style>
+</head>
+<body>
+<div class="app">
+<!-- ============ SIDEBAR ============ -->
+<aside class="side">
+<a class="logo" href="index.html" title="pettwin.app"><svg width="24" height="24" viewBox="0 0 28 28" fill="none"><ellipse cx="14" cy="18.2" rx="6.2" ry="5" fill="#FF6B7C"/><ellipse cx="6.6" cy="11" rx="2.3" ry="3" fill="#FF6B7C" transform="rotate(-16 6.6 11)"/><ellipse cx="11.2" cy="7.2" rx="2.4" ry="3.2" fill="#FF6B7C" transform="rotate(-6 11.2 7.2)"/><ellipse cx="16.8" cy="7.2" rx="2.4" ry="3.2" fill="#FF6B7C" transform="rotate(6 16.8 7.2)"/><ellipse cx="21.4" cy="11" rx="2.3" ry="3" fill="#FF6B7C" transform="rotate(16 21.4 11)"/><circle cx="22.6" cy="5.4" r="3" fill="#FFB627"/></svg></a>
+<button class="nb on" data-p="board" onclick="go('board')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></svg><span>Patients</span><span class="bdg" id="bCrit">1</span></button>
+<button class="nb" data-p="emer" onclick="go('emer')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 19 6v5.2c0 4.9-3.3 7.8-7 9.3-3.7-1.5-7-4.4-7-9.3V6Z"/><path d="M12 9.5v5M9.5 12h5"/></svg><span>Emergency</span><span class="bdg" id="bEmg">1</span></button>
+<button class="nb" data-p="appt" onclick="go('appt')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg><span>Agenda</span></button>
+<button class="nb" data-p="msgs" onclick="go('msgs')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v8a2.5 2.5 0 0 1-2.5 2.5H9l-4.2 3.4c-.5.4-1.3 0-1.3-.7Z"/></svg><span>Messages</span><span class="bdg" id="bMsg">3</span></button>
+<div class="sp"></div>
+<button class="nb" onclick="toggleLang()" id="lb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.3 3.6 5.2 3.6 8.5s-1.1 6.2-3.6 8.5c-2.5-2.3-3.6-5.2-3.6-8.5s1.1-6.2 3.6-8.5Z"/></svg><span id="langTxt">FR</span></button>
+<button class="nb" onclick="toggleTheme()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M19.1 4.9l-1.7 1.7M6.6 17.4l-1.7 1.7"/></svg><span id="thTxt">Dark</span></button>
+<a class="nb" href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 5h5.5v5.5M19.2 4.8 11 13M9 5H6.5A2.5 2.5 0 0 0 4 7.5v10A2.5 2.5 0 0 0 6.5 20h10a2.5 2.5 0 0 0 2.5-2.5V15"/></svg><span>Website</span></a>
+</aside>
+
+<!-- ============ MAIN ============ -->
+<div class="main">
+<div class="top">
+<div><h1 id="tt">Patient Board</h1><div class="s" id="ts">Clinique Vétérinaire La Marsa · Dr. Salma Ben Ali · 4 connected twins</div></div>
+<div class="tr"><span class="ldot"><i></i>LIVE TELEMETRY</span><span class="clock" id="ck">--:--</span></div>
+</div>
+
+<!-- ======== PATIENTS ======== -->
+<div class="pg on" id="pg-board">
+<div class="kp">
+<div class="k s"><b>4</b><span>Patients</span></div>
+<div class="k m"><b>2</b><span>Normal</span></div>
+<div class="k a"><b>1</b><span>Watch</span></div>
+<div class="k r"><b>1</b><span>Critical</span></div>
+<div class="k c"><b id="kF">3</b><span>AI flags today</span></div>
+</div>
+
+<div class="sl">Connected twins — sorted by clinical priority</div>
+
+<!-- LUNA -->
+<div class="pr w" id="row0" onclick="sel(0)">
+<div class="pn"><div class="pv"><svg viewBox="0 0 100 100"><ellipse cx="50" cy="53" rx="30" ry="27.5" fill="#E2B36A"/><path d="M25 34 C12 46 12 70 26 77 C36 82 42 66 38 48 C35 36 32 30 25 34 Z" fill="#B98A3C"/><path d="M75 34 C88 46 88 70 74 77 C64 82 58 66 62 48 C65 36 68 30 75 34 Z" fill="#B98A3C"/><ellipse cx="50" cy="66" rx="16" ry="12" fill="#F2E3C0"/><circle cx="40" cy="50" r="4.4" fill="#33210E"/><circle cx="60" cy="50" r="4.4" fill="#33210E"/><ellipse cx="50" cy="59.5" rx="6.2" ry="4.6" fill="#3A2418"/></svg></div><div><b>Luna</b><span>Golden Retriever · A. Agrebi</span></div></div>
+<div class="pc"><span class="bdg2 bg-a">Watch</span></div>
+<div class="pc"><b class="sc" style="color:var(--amber)"><span id="sc0">84</span></b><span>Score</span></div>
+<div class="pc"><b><span id="r0">24</span></b><span>RESP</span></div>
+<div class="sk hide"><svg viewBox="0 0 260 26" preserveAspectRatio="none"><polyline points="0,14 37,12 74,15 111,13 148,10 185,11 222,8 260,7" fill="none" stroke="#C77F00" stroke-width="2" stroke-linecap="round"/></svg></div>
+<div class="pc hide"><b style="font-size:11.5px;color:var(--mut);font-weight:600">−42% · 39.2°C</b><span>24H TREND</span></div>
+<div class="arrow">›</div>
+</div>
+
+<!-- REX -->
+<div class="pr" id="row1" onclick="sel(1)">
+<div class="pn"><div class="pv"><svg viewBox="0 0 100 100"><path d="M31 38 L20 12 L47 23 Z" fill="#C89B5C"/><path d="M69 38 L80 12 L53 23 Z" fill="#C89B5C"/><ellipse cx="50" cy="55" rx="28" ry="26.5" fill="#C89B5C"/><ellipse cx="50" cy="64" rx="17" ry="14" fill="#2E2115" opacity=".85"/><ellipse cx="37" cy="45" rx="3" ry="1.7" fill="#F6D9A4"/><ellipse cx="63" cy="45" rx="3" ry="1.7" fill="#F6D9A4"/><circle cx="39.5" cy="52" r="4" fill="#8A5A10"/><circle cx="60.5" cy="52" r="4" fill="#8A5A10"/><ellipse cx="50" cy="61.5" rx="6" ry="4.4" fill="#241811"/></svg></div><div><b>Rex</b><span>Belgian Malinois · M. Trabelsi</span></div></div>
+<div class="pc"><span class="bdg2 bg-m">Normal</span></div>
+<div class="pc"><b class="sc" style="color:var(--mint)">95</b><span>Score</span></div>
+<div class="pc"><b><span id="r1">18</span></b><span>RESP</span></div>
+<div class="sk hide"><svg viewBox="0 0 260 26" preserveAspectRatio="none"><polyline points="0,13 37,12 74,13 111,12 148,13 185,12 222,13 260,12" fill="none" stroke="#1F9E77" stroke-width="2" stroke-linecap="round"/></svg></div>
+<div class="pc hide"><b style="font-size:11.5px;color:var(--mut);font-weight:600">On goal · 38.4°C</b><span>24H TREND</span></div>
+<div class="arrow">›</div>
+</div>
+
+<!-- MIMI -->
+<div class="pr x" id="row2" onclick="sel(2)">
+<div class="pn"><div class="pv"><svg viewBox="0 0 100 100"><path d="M26 40 L15 13 L47 25 Z" fill="#4A2F1E"/><path d="M74 40 L85 13 L53 25 Z" fill="#4A2F1E"/><ellipse cx="50" cy="55" rx="26" ry="25" fill="#EDE0CC"/><ellipse cx="50" cy="46" rx="8" ry="5.5" fill="#5A3A26" opacity=".55"/><ellipse cx="50" cy="65" rx="14" ry="12.5" fill="#5A3A26" opacity=".55"/><ellipse cx="39" cy="53" rx="4.6" ry="3.4" fill="#3F96DD" stroke="#3A2418"/><ellipse cx="61" cy="53" rx="4.6" ry="3.4" fill="#3F96DD" stroke="#3A2418"/><path d="M47 60.5 h6 c1.4 0 2 1.1 1.2 2.2 l-2.4 2.9 c-.9 1.1-2.3 1.1-3.2 0 l-2.4-2.9 c-.8-1.1-.2-2.2 1.2-2.2 Z" fill="#D98D86"/></svg></div><div><b>Mimi</b><span>Siamese · S. Karoui</span></div></div>
+<div class="pc"><span class="bdg2 bg-x">Critical</span></div>
+<div class="pc"><b class="sc" style="color:var(--red)"><span id="sc2">61</span></b><span>Score</span></div>
+<div class="pc"><b><span id="r2">34</span></b><span>RESP</span></div>
+<div class="sk hide"><svg viewBox="0 0 260 26" preserveAspectRatio="none"><polyline points="0,10 37,9 74,8 111,8 148,6 185,6 222,5 260,4" fill="none" stroke="#D0333A" stroke-width="2" stroke-linecap="round"/></svg></div>
+<div class="pc hide"><b style="font-size:11.5px;color:var(--mut);font-weight:600">−71% · 40.1°C</b><span>24H TREND</span></div>
+<div class="arrow">›</div>
+</div>
+
+<!-- SIMBA -->
+<div class="pr" id="row3" onclick="sel(3)">
+<div class="pn"><div class="pv"><svg viewBox="0 0 100 100"><path d="M23 35 C11 47 11 70 25 77 C35 82 40 64 36 47 C33 36 30 31 23 35 Z" fill="#8A5C2E"/><path d="M77 35 C89 47 89 70 75 77 C65 82 60 64 64 47 C67 36 70 31 77 35 Z" fill="#8A5C2E"/><ellipse cx="50" cy="54" rx="28.5" ry="26.5" fill="#A97440"/><circle cx="61" cy="50" r="9.5" fill="#5C3A1E" opacity=".85"/><ellipse cx="50" cy="65" rx="15.5" ry="11.5" fill="#EAD3AC"/><circle cx="39.5" cy="51" r="4.2" fill="#5E3808"/><circle cx="61" cy="51" r="4.2" fill="#5E3808"/><ellipse cx="50" cy="59" rx="5.8" ry="4.3" fill="#241811"/></svg></div><div><b>Simba</b><span>Local Mix · N. Hamdi</span></div></div>
+<div class="pc"><span class="bdg2 bg-m">Normal</span></div>
+<div class="pc"><b class="sc" style="color:var(--mint)">90</b><span>Score</span></div>
+<div class="pc"><b><span id="r3">19</span></b><span>RESP</span></div>
+<div class="sk hide"><svg viewBox="0 0 260 26" preserveAspectRatio="none"><polyline points="0,12 37,13 74,12 111,13 148,12 185,13 222,12 260,13" fill="none" stroke="#1F9E77" stroke-width="2" stroke-linecap="round"/></svg></div>
+<div class="pc hide"><b style="font-size:11.5px;color:var(--mut);font-weight:600">On goal · 38.6°C</b><span>24H TREND</span></div>
+<div class="arrow">›</div>
+</div>
+
+<!-- ============ DETAIL: LUNA ============ -->
+<div class="c" id="det0" style="margin-top:16px">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+<div style="display:flex;gap:13px;align-items:center"><div class="pv" style="width:52px;height:52px;border-radius:14px"><svg viewBox="0 0 100 100"><ellipse cx="50" cy="53" rx="30" ry="27.5" fill="#E2B36A"/><path d="M25 34 C12 46 12 70 26 77 C36 82 42 66 38 48 C35 36 32 30 25 34 Z" fill="#B98A3C"/><path d="M75 34 C88 46 88 70 74 77 C64 82 58 66 62 48 C65 36 68 30 75 34 Z" fill="#B98A3C"/><ellipse cx="50" cy="66" rx="16" ry="12" fill="#F2E3C0"/><circle cx="40" cy="50" r="4.4" fill="#33210E"/><circle cx="60" cy="50" r="4.4" fill="#33210E"/><ellipse cx="50" cy="59.5" rx="6.2" ry="4.6" fill="#3A2418"/></svg></div><div><div class="ch" style="font-size:18px">Luna</div><div class="cs">Golden Retriever · 4 y · ♀ · A. Agrebi · <span class="bdg2 bg-a">Watch</span></div></div></div>
+<button class="btn s" onclick="window.print()">🖨️ PDF</button>
+</div>
+<div class="vg">
+<div class="vb w"><b>84</b><span>Health score</span></div>
+<div class="vb"><b><span id="dr0">24</span><em>● LIVE</em></b><span>Respiration br/min</span></div>
+<div class="vb w"><b>39.2°C</b><span>Skin temp</span></div>
+<div class="vb"><b>142 bpm</b><span>Heart rate</span></div>
+<div class="vb w"><b>−42%</b><span>Activity</span></div>
+<div class="vb"><b>9 h 40</b><span>Sleep last night</span></div>
+</div>
+<svg class="cht" viewBox="0 0 440 130"><line x1="0" x2="440" y1="72" y2="72" stroke="#DFE9F1"/><line x1="0" x2="440" y1="42" y2="42" stroke="#DFE9F1"/><line x1="0" x2="440" y1="12" y2="12" stroke="#DFE9F1"/><text x="438" y="8" fill="#93A5B3" font-size="8.5" font-weight="700" text-anchor="end" font-family="Inter Tight">26</text><text x="438" y="38" fill="#93A5B3" font-size="8.5" font-weight="700" text-anchor="end" font-family="Inter Tight">22</text><polyline points="0,72 63,70 126,73 189,71 252,72 315,70 378,71 440,70" fill="none" stroke="#93A5B3" stroke-width="2.5" stroke-dasharray="5 4" stroke-linecap="round"/><polyline points="0,71 63,66 126,57 189,49 252,43 315,37 378,31 440,26" fill="none" stroke="#2E86C0" stroke-width="3" stroke-linecap="round"/><text x="0" y="126" fill="#93A5B3" font-size="9" font-weight="700" font-family="Inter Tight">now</text><text x="440" y="126" fill="#93A5B3" font-size="9" font-weight="700" text-anchor="end" font-family="Inter Tight">-24h</text></svg>
+<div class="ai"><div class="h">🤖 AI CLINICAL SUMMARY</div>
+<p>Activity −42% and respiration +26% above her personal baseline for 6 hours, with elevated skin temperature (39.2°C). The pattern matches an early infection or inflammatory response rather than a behavioral change — appetite logged normal this morning.</p>
+<div class="e">Deviation started 08:10 — sudden, not gradual (rules out heat)</div>
+<div class="e">Respiration elevated at rest, not after exertion</div>
+<div class="e">Skin temp +0.6°C versus her own 30-day range</div>
+<p class="r">✓ Recommendation: CBC panel today — sample before symptoms appear. Twin packet attached to this file.</p></div>
+<div class="acts">
+<button class="btn p" onclick="toast('Note pushed to the owner\'s app ✓')">📲 Push note to owner</button>
+<button class="btn s" onclick="go('appt')">📅 Agenda</button>
+<button class="btn s" onclick="toast('Lab order created — CBC panel sent to laboratory')">🧪 Lab</button>
+</div></div>
+<div class="c"><div class="ch">Twin timeline — how it unfolded</div><div class="cs">Luna · last 24 hours</div>
+<div style="margin-top:8px">
+<div class="tl g"><span class="tt">09:14</span><span class="tb">Twin packet auto-sent to this dashboard — before owner arrival</span></div>
+<div class="tl w"><span class="tt">08:10</span><span class="tb">Activity drop begins — twin raises an internal flag</span></div>
+<div class="tl w"><span class="tt">09:45</span><span class="tb">Respiration confirmed elevated at rest</span></div>
+<div class="tl"><span class="tt">12:30</span><span class="tb">Owner notified — gentle check-up suggested</span></div>
+<div class="tl x"><span class="tt">14:02</span><span class="tb">Skin temp crosses the +0.6°C threshold</span></div>
+</div></div>
+
+<!-- ============ DETAIL: REX ============ -->
+<div class="c" id="det1" style="margin-top:16px;display:none">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+<div style="display:flex;gap:13px;align-items:center"><div class="pv" style="width:52px;height:52px;border-radius:14px"><svg viewBox="0 0 100 100"><path d="M31 38 L20 12 L47 23 Z" fill="#C89B5C"/><path d="M69 38 L80 12 L53 23 Z" fill="#C89B5C"/><ellipse cx="50" cy="55" rx="28" ry="26.5" fill="#C89B5C"/><ellipse cx="50" cy="64" rx="17" ry="14" fill="#2E2115" opacity=".85"/><ellipse cx="37" cy="45" rx="3" ry="1.7" fill="#F6D9A4"/><ellipse cx="63" cy="45" rx="3" ry="1.7" fill="#F6D9A4"/><circle cx="39.5" cy="52" r="4" fill="#8A5A10"/><circle cx="60.5" cy="52" r="4" fill="#8A5A10"/><ellipse cx="50" cy="61.5" rx="6" ry="4.4" fill="#241811"/></svg></div><div><div class="ch" style="font-size:18px">Rex</div><div class="cs">Belgian Malinois · 6 y · ♂ · M. Trabelsi · <span class="bdg2 bg-m">Normal</span></div></div></div>
+<button class="btn s" onclick="window.print()">🖨️ PDF</button>
+</div>
+<div class="vg">
+<div class="vb"><b>95</b><span>Health score</span></div>
+<div class="vb"><b><span id="dr1">18</span><em>● LIVE</em></b><span>Respiration br/min</span></div>
+<div class="vb"><b>38.4°C</b><span>Skin temp</span></div>
+<div class="vb"><b>96 bpm</b><span>Heart rate</span></div>
+<div class="vb"><b>On goal</b><span>Activity</span></div>
+<div class="vb"><b>7 h 55</b><span>Sleep last night</span></div>
+</div>
+<svg class="cht" viewBox="0 0 440 130"><line x1="0" x2="440" y1="72" y2="72" stroke="#DFE9F1"/><line x1="0" x2="440" y1="42" y2="42" stroke="#DFE9F1"/><polyline points="0,72 63,71 126,72 189,71 252,72 315,71 378,72 440,71" fill="none" stroke="#93A5B3" stroke-width="2.5" stroke-dasharray="5 4" stroke-linecap="round"/><polyline points="0,72 63,70 126,71 189,69 252,70 315,68 378,70 440,69" fill="none" stroke="#2E86C0" stroke-width="3" stroke-linecap="round"/></svg>
+<div class="ai"><div class="h">🤖 AI CLINICAL SUMMARY</div>
+<p>All metrics within his learned baseline for 21 consecutive days. Post-op incision temperature normalized. Hydrotherapy responding well — activity recovering toward pre-surgery levels.</p>
+<div class="e">21 days in-baseline — longest streak since surgery</div>
+<div class="e">Resting respiration stable at 17–19 br/min</div>
+<div class="e">No night restlessness detected in 2 weeks</div>
+<p class="r">✓ Recommendation: continue the hydrotherapy plan; remove from Watch list at the next session.</p></div>
+<div class="acts"><button class="btn p" onclick="toast('Note pushed to the owner\'s app ✓')">📲 Push note to owner</button><button class="btn s" onclick="toast('Lab order created')">🧪 Lab</button></div></div>
+
+<!-- ============ DETAIL: MIMI ============ -->
+<div class="c" id="det2" style="margin-top:16px;display:none">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+<div style="display:flex;gap:13px;align-items:center"><div class="pv" style="width:52px;height:52px;border-radius:14px"><svg viewBox="0 0 100 100"><path d="M26 40 L15 13 L47 25 Z" fill="#4A2F1E"/><path d="M74 40 L85 13 L53 25 Z" fill="#4A2F1E"/><ellipse cx="50" cy="55" rx="26" ry="25" fill="#EDE0CC"/><ellipse cx="50" cy="46" rx="8" ry="5.5" fill="#5A3A26" opacity=".55"/><ellipse cx="50" cy="65" rx="14" ry="12.5" fill="#5A3A26" opacity=".55"/><ellipse cx="39" cy="53" rx="4.6" ry="3.4" fill="#3F96DD" stroke="#3A2418"/><ellipse cx="61" cy="53" rx="4.6" ry="3.4" fill="#3F96DD" stroke="#3A2418"/><path d="M47 60.5 h6 c1.4 0 2 1.1 1.2 2.2 l-2.4 2.9 c-.9 1.1-2.3 1.1-3.2 0 l-2.4-2.9 c-.8-1.1-.2-2.2 1.2-2.2 Z" fill="#D98D86"/></svg></div><div><div class="ch" style="font-size:18px">Mimi</div><div class="cs">Siamese · 2 y · ♀ · S. Karoui · <span class="bdg2 bg-x">Critical</span></div></div></div>
+<button class="btn s" onclick="window.print()">🖨️ PDF</button>
+</div>
+<div class="vg">
+<div class="vb x"><b>61</b><span>Health score</span></div>
+<div class="vb x"><b><span id="dr2">34</span><em>● LIVE</em></b><span>Respiration br/min</span></div>
+<div class="vb x"><b>40.1°C</b><span>Skin temp</span></div>
+<div class="vb"><b>188 bpm</b><span>Heart rate</span></div>
+<div class="vb x"><b>−71%</b><span>Activity</span></div>
+<div class="vb"><b>11 h 05</b><span>Sleep last night</span></div>
+</div>
+<svg class="cht" viewBox="0 0 440 130"><line x1="0" x2="440" y1="72" y2="72" stroke="#DFE9F1"/><line x1="0" x2="440" y1="42" y2="42" stroke="#DFE9F1"/><polyline points="0,72 63,71 126,72 189,71 252,72 315,71 378,72 440,71" fill="none" stroke="#93A5B3" stroke-width="2.5" stroke-dasharray="5 4" stroke-linecap="round"/><polyline points="0,70 63,66 126,60 189,54 252,46 315,38 378,28 440,20" fill="none" stroke="#D0333A" stroke-width="3" stroke-linecap="round"/></svg>
+<div class="ai"><div class="h">🤖 AI CLINICAL SUMMARY</div>
+<p>Fever (40.1°C) with tachypnea at rest and severe activity collapse. The twin flagged the anomaly 4 hours before the owner called; ER protocol started 09:14. Differential pending blood work.</p>
+<div class="e">Twin alert 05:30 · owner call 09:14 — a 4-hour head start</div>
+<div class="e">Respiration 34 br/min sustained at rest (her baseline: 22)</div>
+<div class="e">Activity −71% — consistent with lethargy, not hiding behavior</div>
+<p class="r">✓ Recommendation: blood panel + fluids on arrival. Recheck vitals every 2 h through the twin.</p></div>
+<div class="acts">
+<button class="btn r" onclick="toast('ER protocol running — recheck every 2 h via the twin')">🚨 ER protocol</button>
+<button class="btn p" onclick="toast('Note pushed to the owner\'s app ✓')">📲 Push note</button>
+<button class="btn s" onclick="toast('Lab order created — blood panel sent')">🧪 Lab</button>
+</div></div>
+
+<!-- ============ DETAIL: SIMBA ============ -->
+<div class="c" id="det3" style="margin-top:16px;display:none">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+<div style="display:flex;gap:13px;align-items:center"><div class="pv" style="width:52px;height:52px;border-radius:14px"><svg viewBox="0 0 100 100"><path d="M23 35 C11 47 11 70 25 77 C35 82 40 64 36 47 C33 36 30 31 23 35 Z" fill="#8A5C2E"/><path d="M77 35 C89 47 89 70 75 77 C65 82 60 64 64 47 C67 36 70 31 77 35 Z" fill="#8A5C2E"/><ellipse cx="50" cy="54" rx="28.5" ry="26.5" fill="#A97440"/><circle cx="61" cy="50" r="9.5" fill="#5C3A1E" opacity=".85"/><ellipse cx="50" cy="65" rx="15.5" ry="11.5" fill="#EAD3AC"/><circle cx="39.5" cy="51" r="4.2" fill="#5E3808"/><circle cx="61" cy="51" r="4.2" fill="#5E3808"/><ellipse cx="50" cy="59" rx="5.8" ry="4.3" fill="#241811"/></svg></div><div><div class="ch" style="font-size:18px">Simba</div><div class="cs">Local Mix · 8 y · ♂ · N. Hamdi · <span class="bdg2 bg-m">Normal</span></div></div></div>
+<button class="btn s" onclick="window.print()">🖨️ PDF</button>
+</div>
+<div class="vg">
+<div class="vb"><b>90</b><span>Health score</span></div>
+<div class="vb"><b><span id="dr3">19</span><em>● LIVE</em></b><span>Respiration br/min</span></div>
+<div class="vb"><b>38.6°C</b><span>Skin temp</span></div>
+<div class="vb"><b>101 bpm</b><span>Heart rate</span></div>
+<div class="vb"><b>On goal</b><span>Activity</span></div>
+<div class="vb"><b>8 h 10</b><span>Sleep last night</span></div>
+</div>
+<svg class="cht" viewBox="0 0 440 130"><line x1="0" x2="440" y1="72" y2="72" stroke="#DFE9F1"/><polyline points="0,72 63,71 126,72 189,71 252,72 315,71 378,72 440,71" fill="none" stroke="#93A5B3" stroke-width="2.5" stroke-dasharray="5 4" stroke-linecap="round"/><polyline points="0,73 63,72 126,71 189,72 252,71 315,72 378,71 440,72" fill="none" stroke="#2E86C0" stroke-width="3" stroke-linecap="round"/></svg>
+<div class="ai"><div class="h">🤖 AI CLINICAL SUMMARY</div>
+<p>Senior patient, stable. Arthritis well managed — weight trending −0.4 kg on the new diet, mobility improving per activity distribution. No anomalies in 30 days.</p>
+<div class="e">Weight −0.4 kg over 3 weeks, on target</div>
+<div class="e">Fewer rest-to-stand hesitations detected</div>
+<div class="e">Sleep quality stable at 8 h</div>
+<p class="r">✓ Recommendation: maintain the diet; senior blood panel at the next visit as planned.</p></div>
+<div class="acts"><button class="btn p" onclick="toast('Note pushed to the owner\'s app ✓')">📲 Push note to owner</button><button class="btn s" onclick="toast('Lab order created')">🧪 Lab</button></div></div>
+</div>
+
+<!-- ======== EMERGENCY ======== -->
+<div class="pg" id="pg-emer">
+<div class="em pp" id="emBox">
+<div class="pu">🚨</div>
+<div style="flex:1;min-width:220px"><b>Emergency intake — Mimi (Siamese, 2y)</b><p>Owner-activated 02:14 · twin packet received before arrival · ETA 12 min</p><p>Vitals live · history pre-loaded · packet pinned to her file</p></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn r" onclick="ack()">Acknowledge</button><button class="btn s" onclick="toast('ER routing confirmed — Clinique Ariana notified')">Route to ER</button></div>
+</div>
+<div class="c"><div class="ch">Mimi · Siamese · 2 y · ♀</div><div class="cs">S. Karoui · Health score 61</div>
+<div class="vg">
+<div class="vb x"><b><span id="er2">34</span></b><span>Respiration</span></div>
+<div class="vb x"><b>40.1°C</b><span>Skin temp</span></div>
+<div class="vb"><b>188 bpm</b><span>Heart rate</span></div>
+<div class="vb x"><b>−71%</b><span>Activity</span></div>
+</div>
+<div class="ai"><div class="h">🤖 AI CLINICAL SUMMARY</div>
+<p>Fever (40.1°C) with tachypnea at rest and severe activity collapse. The twin flagged the anomaly 4 hours before the owner called; ER protocol started 09:14.</p>
+<div class="e">Twin alert 05:30 · owner call 09:14 — a 4-hour head start</div>
+<div class="e">Respiration 34 br/min sustained at rest (her baseline: 22)</div>
+<p class="r">✓ Recommendation: blood panel + fluids on arrival. Recheck vitals every 2 h through the twin.</p></div></div>
+<div class="sl">Resolved emergencies — last 30 days</div>
+<div class="ls">
+<div class="lr"><div class="ic">✅</div><div class="in"><b>Luna · Golden Retriever</b><p>Heat-stress alert confirmed — owner moved walk to evening. No intervention needed.</p></div><span class="wh">12 Jun</span><span class="tg m">resolved</span></div>
+<div class="lr"><div class="ic">✅</div><div class="in"><b>Rex · Malinois</b><p>Post-op monitor: incision temperature normalized day 4. Removed from watch.</p></div><span class="wh">28 May</span><span class="tg m">resolved</span></div>
+</div>
+</div>
+
+<!-- ======== AGENDA ======== -->
+<div class="pg" id="pg-appt">
+<div class="twoc">
+<div><div class="sl" style="margin-top:0">Today</div><div class="ls">
+<div class="lr"><span class="wh">09:00</span><div class="in"><b>Luna — Annual check-up</b><p>Vaccination booklet review · A. Agrebi</p></div><span class="tg b">confirmed</span></div>
+<div class="lr"><span class="wh">11:30</span><div class="in"><b>Mimi — Post-ER recheck</b><p>Fever follow-up · S. Karoui</p></div><span class="tg m">arrived</span></div>
+<div class="lr"><span class="wh">15:00</span><div class="in"><b>Rex — Hydrotherapy 6/8</b><p>Session · M. Trabelsi</p></div><span class="tg b">confirmed</span></div>
+</div></div>
+<div><div class="sl" style="margin-top:0">Upcoming</div><div class="ls">
+<div class="lr"><span class="wh">Thu</span><div class="in"><b>Simba — Senior panel</b><p>Arthritis review · 10:30 · N. Hamdi</p></div><span class="tg b">confirmed</span></div>
+<div class="lr"><span class="wh">Fri</span><div class="in"><b>Litter (6 puppies) — First weigh-in</b><p>Deworming · 09:00 · Breeder: T. Mansouri</p></div><span class="tg a">pending</span></div>
+</div></div>
+</div>
+</div>
+
+<!-- ======== MESSAGES ======== -->
+<div class="pg" id="pg-msgs">
+<div class="twoc">
+<div><div class="sl" style="margin-top:0">Inbox</div><div class="ls">
+<div class="lr"><div class="ic" style="color:var(--sky);font-weight:800">S</div><div class="in"><b>S. Karoui <span style="color:var(--faint);font-weight:600;font-size:10px">· Mimi's owner</span></b><p>Is the 18:00 recheck still on? She ate normally this morning.</p></div><span class="wh">08:42</span></div>
+<div class="lr"><div class="ic" style="color:var(--sky);font-weight:800">A</div><div class="in"><b>A. Agrebi <span style="color:var(--faint);font-weight:600;font-size:10px">· Luna's owner</span></b><p>Thanks for the note — switched to the 165 g portions you pushed. 🙏</p></div><span class="wh">Yest.</span></div>
+<div class="lr"><div class="ic" style="color:var(--sky);font-weight:800">M</div><div class="in"><b>M. Trabelsi <span style="color:var(--faint);font-weight:600;font-size:10px">· Rex's owner</span></b><p>Hydrotherapy went well, he's much calmer after.</p></div><span class="wh">Mon</span></div>
+</div>
+<div class="newmsg"><div class="sl" style="margin:0 0 9px">New message to an owner</div>
+<textarea id="mt" placeholder="Write a clinical note… (arrives in the owner's app as a push)"></textarea>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-top:9px;gap:9px;flex-wrap:wrap">
+<select id="mto"><option>Luna · A. Agrebi</option><option>Rex · M. Trabelsi</option><option>Mimi · S. Karoui</option><option>Simba · N. Hamdi</option></select>
+<button class="btn p" onclick="send()">Push to owner</button>
+</div></div></div>
+<div><div class="sl" style="margin-top:0">Sent notes & replies</div><div class="ls" id="mout">
+<div class="lr"><div class="ic">🩺</div><div class="in"><b>Luna · A. Agrebi</b><p>Reduce kibble to 165 g/meal for 5 days. Recheck weight Friday.</p></div><span class="wh">09:12</span></div>
+<div class="lr"><div class="ic">🩺</div><div class="in"><b>Mimi · S. Karoui</b><p>Keep the 18:00 recheck. Bring the ER discharge sheet.</p></div><span class="wh">07:55</span></div>
+<div class="lr"><div class="ic">🩺</div><div class="in"><b>Simba · N. Hamdi</b><p>New diet working — continue the −0.4 kg trend, blood panel in 4 weeks.</p></div><span class="wh">Mon</span></div>
+</div></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="dbar"><button onclick="demoA()">⚠️ Anomaly</button><button class="r" onclick="demoE()">🚨 Emergency</button></div>
+<div id="toast"></div>
+<div class="stat"><span><b>●</b> Dashboard ready</span><span>Live telemetry: active</span><span>PetTwin Clinic · demo data</span></div>
+
+<script>
+/* All content above is static HTML — JS below only adds interactivity. If JS fails, every screen still shows. */
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(function(){t.style.display='none';},2800);}
+function go(p){document.querySelectorAll('.pg').forEach(function(x){x.classList.remove('on');});
+document.getElementById('pg-'+p).classList.add('on');
+document.querySelectorAll('.nb[data-p]').forEach(function(x){x.classList.toggle('on',x.getAttribute('data-p')===p);});
+document.getElementById('tt').textContent=p==='board'?'Patient Board':p==='emer'?'Emergency Intake':p==='appt'?'Agenda':'Messages';
+document.getElementById('ts').textContent=p==='board'?'Clinique Vétérinaire La Marsa · Dr. Salma Ben Ali · 4 connected twins':p==='emer'?'Live packets from activated Emergency Mode':p==='appt'?'Today and upcoming · synced with the owner app':'Owner conversations · pushed notes · replies';
+document.querySelector('.main').scrollTop=0;}
+function sel(i){document.querySelectorAll('.pr').forEach(function(x){x.classList.remove('sel');});
+document.getElementById('row'+i).classList.add('sel');
+[0,1,2,3].forEach(function(x){document.getElementById('det'+x).style.display=x===i?'block':'none';});}
+function ack(){document.getElementById('emBox').style.display='none';document.getElementById('bEmg').style.display='none';toast('Emergency acknowledged — packet pinned to Mimi\'s file');}
+function send(){var v=document.getElementById('mt').value.trim();if(!v){toast('Write the note first');return;}
+var d=document.createElement('div');d.className='lr';d.innerHTML='<div class="ic">🩺</div><div class="in"><b>'+document.getElementById('mto').value+'</b><p>'+v.replace(/</g,'&lt;')+'</p></div><span class="wh">now</span>';
+document.getElementById('mout').prepend(d);document.getElementById('mt').value='';toast('Note pushed to the owner\'s app ✓');}
+function demoA(){var f=document.getElementById('kF');f.textContent=+f.textContent+1;toast('⚠️ New anomaly — AI flag added to the board');go('board');}
+function demoE(){document.getElementById('emBox').style.display='flex';document.getElementById('bEmg').style.display='grid';go('emer');}
+/* clock */
+setInterval(function(){document.getElementById('ck').textContent=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});},15000);
+(function(){document.getElementById('ck').textContent=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});})();
+/* live respiration tick */
+var live=[24,18,34,19];
+setInterval(function(){var base=[24,18,34,19];
+for(var i=0;i<4;i++){var v=base[i]+(Math.random()*2-1)*1.2;if(i===2&&Math.random()<.1)v+=3;
+live[i]=Math.max(10,Math.round(v*10)/10);
+var e=document.getElementById('r'+i);if(e)e.textContent=live[i];
+var de=document.getElementById('dr'+i);if(de)de.textContent=live[i];
+var er=document.getElementById('er2');if(i===2&&er)er.textContent=live[i];}},2200);
+/* language */
+var lang='en';
+var FR={tt:{board:'Tableau patients',emer:'Admissions urgence',appt:'Agenda',msgs:'Messages'},
+ts:{board:'Clinique Vétérinaire La Marsa · Dr. Salma Ben Ali · 4 jumelles connectées',emer:'Dossiers en direct des Mode urgence activés',appt:'Aujourd\'hui et à venir · synchronisé avec l\'app du propriétaire',msgs:'Conversations propriétaires · notes envoyées · réponses'},
+nav:{board:'Patients',emer:'Urgences',appt:'Agenda',msgs:'Messages'},
+k:{Patients:'Patients',Normal:'Normaux',Watch:'À surveiller',Critical:'Critiques','AI flags today':'Signalements IA aujourd\'hui'},
+sec:{'Connected twins — sorted by clinical priority':'Jumelles connectées — triées par priorité clinique','Resolved emergencies — last 30 days':'Urgences résolues — 30 derniers jours',Today:'Aujourd\'hui',Upcoming:'À venir',Inbox:'Boîte de réception','Sent notes & replies':'Notes & réponses envoyées','New message to an owner':'Nouveau message à un propriétaire'},
+bd:{Normal:'Normal',Watch:'À surveiller',Critical:'Critique',confirmed:'confirmé',arrived:'arrivé',pending:'en attente',resolved:'résolue'},
+em:{'Emergency intake — Mimi (Siamese, 2y)':'Admission urgence — Mimi (Siamois, 2 ans)','Owner-activated 02:14 · twin packet received before arrival · ETA 12 min':'Activée par la propriétaire à 02:14 · dossier reçu avant l\'arrivée · ETA 12 min',Acknowledge:'Accuser réception','Route to ER':'Orienter urgences'},
+lbl:{Score:'Score',RESP:'RESP','24H TREND':'TENDANCE 24H','Health score':'Score santé','Skin temp':'Temp. cutanée','Heart rate':'Fréq. cardiaque',Activity:'Activité','Sleep last night':'Sommeil hier nuit',Respiration:'Respiration',Patients:'Patients'}};
+function toggleLang(){lang=lang==='en'?'fr':'en';document.getElementById('langTxt').textContent=lang==='en'?'FR':'EN';
+document.querySelectorAll('[data-p]').forEach(function(n){n.querySelector('span:last-of-type').textContent=FR.nav[n.getAttribute('data-p')];});
+go(document.querySelector('.pg.on').id.replace('pg-',''));}
+/* theme */
+function toggleTheme(){var h=document.documentElement;h.setAttribute('data-theme',h.getAttribute('data-theme')==='dark'?'light':'dark');
+document.getElementById('thTxt').textContent=h.getAttribute('data-theme')==='dark'?'Light':'Dark';}
+/* select current patient on load */
+sel(0);
+</script>
+</body>
+</html>
